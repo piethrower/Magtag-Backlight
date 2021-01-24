@@ -29,7 +29,7 @@ settings = ["brightness", "speed", "mode"]
 setting_num = 0
 
 modes = ["rainbow", "off"]
-mode_num =
+mode_num = 0
 
 wait_time = 0
 
