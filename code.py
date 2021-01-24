@@ -25,7 +25,7 @@ magtag.peripherals.neopixel_disable = False
 pixels = neopixel.NeoPixel(pixel_pin, num_pixels,
                            brightness=pixel_brightness, auto_write=False)
 
-settings = ["brightness", "speed"]
+settings = ["brightness", "speed", "mode"]
 setting_num = 0
 
 modes = ["rainbow", "off"]
@@ -107,38 +107,49 @@ while 1:
         if magtag.peripherals.button_a_pressed:
             setting_num += 1
             setting_num %= len(settings)
-            magtag.set_text(settings[setting])
+            magtag.set_text(settings[setting_num])
         elif magtag.peripherals.button_b_pressed:
             setting_num -= 1
             setting_num %= len(settings)
-            magtag.set_text(settings[setting])
+            magtag.set_text(settings[setting_num])
         elif magtag.peripherals.button_c_pressed:
-            mode = settings[setting]
-            if mode is "brightness":
+            setting_mode = settings[setting_num]
+            if setting_mode is "brightness":
                 pixel_brightness += 0.1
                 pixel_brightness = clamp(pixel_brightness, 0.1, 1)
                 pixels.brightness = pixel_brightness
                 scale(RED, BLUE, pixel_brightness)
-            if mode is "speed":
+            if setting_mode is "speed":
                 wait_time -= 0.001
                 wait_time = clamp(wait_time, 0, 0.1)
                 scale(RED, BLUE, wait_time * 100)
+            if mode_mode is "mode":
+                mode_num -= 1
+                mode_num %= len(modes)
         elif magtag.peripherals.button_d_pressed:
-            mode = settings[setting]
-            if mode is "brightness":
+            setting_mode = settings[setting_num]
+            if setting_mode is "brightness":
                 pixel_brightness -= 0.1
                 pixel_brightness = clamp(pixel_brightness, 0.1, 1)
                 pixels.brightness = pixel_brightness
                 scale(RED, BLUE, pixel_brightness)
-            if mode is "speed":
+            if setting_mode is "speed":
                 wait_time += 0.001
                 wait_time = clamp(wait_time, 0, 0.1)
                 scale(RED, BLUE, wait_time * 100)
+            if mode_mode is "mode":
+                mode_num += 1
+                mode_num %= len(modes)
     elif (not magtag.peripherals.any_button_pressed):
         button_pressed = False
 
-        rainbow(rainbow_pos)  # Increase the number to slow down the rainbow
-        rainbow_pos += 1
-        rainbow_pos %= 255
+        cur_mode = modes[mode_num]
+        if cur_mode is "rainbow":
+            magtag.peripherals.neopixel_disable = False
+            rainbow(rainbow_pos)  # Increase the number to slow down the rainbow
+            rainbow_pos += 1
+            rainbow_pos %= 255
+        elif cur_mode is "off":
+            magtag.peripherals.neopixel_disable = True
 
     time.sleep(wait_time)
