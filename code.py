@@ -98,7 +98,7 @@ magtag.add_text(
     text_color=0x000000,
     line_spacing=0.8
 )
-magtag.set_text(settings[setting])
+magtag.set_text(settings[setting_num])
 
 while 1:
 
@@ -123,7 +123,7 @@ while 1:
                 wait_time -= 0.001
                 wait_time = clamp(wait_time, 0, 0.1)
                 scale(RED, BLUE, wait_time * 100)
-            if mode_mode is "mode":
+            if setting_mode is "mode":
                 mode_num -= 1
                 mode_num %= len(modes)
         elif magtag.peripherals.button_d_pressed:
@@ -137,7 +137,7 @@ while 1:
                 wait_time += 0.001
                 wait_time = clamp(wait_time, 0, 0.1)
                 scale(RED, BLUE, wait_time * 100)
-            if mode_mode is "mode":
+            if setting_mode is "mode":
                 mode_num += 1
                 mode_num %= len(modes)
     elif (not magtag.peripherals.any_button_pressed):
@@ -145,11 +145,11 @@ while 1:
 
         cur_mode = modes[mode_num]
         if cur_mode is "rainbow":
-            magtag.peripherals.neopixel_disable = False
             rainbow(rainbow_pos)  # Increase the number to slow down the rainbow
             rainbow_pos += 1
             rainbow_pos %= 255
         elif cur_mode is "off":
-            magtag.peripherals.neopixel_disable = True
+            pixels.fill((0,0,0))
+            pixels.show()
 
     time.sleep(wait_time)
