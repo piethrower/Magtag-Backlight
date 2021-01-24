@@ -7,8 +7,6 @@ import terminalio
 
 magtag = MagTag()
 
-magtag.network.get_local_time()
-
 pixel_pin = board.D10
 num_pixels = 30
 
@@ -27,13 +25,18 @@ magtag.peripherals.neopixel_disable = False
 pixels = neopixel.NeoPixel(pixel_pin, num_pixels,
                            brightness=pixel_brightness, auto_write=False)
 
-setting_modes = ["brightness","speed"]
-setting_mode = 0
+settings = ["brightness", "speed"]
+setting_num = 0
+
+modes = ["rainbow", "off"]
+mode_num =
+
 wait_time = 0
 
 button_pressed = False
 
 rainbow_pos = 0
+
 
 def wheel(pos):
     # Input a value 0 to 255 to get a color value.
@@ -63,12 +66,16 @@ def color_chase(color, wait):
         time.sleep(wait)
         pixels.show()
 
+
 def scale(color1, color2, amount):
-    for i in range(num_pixels):
-        pixels[i] = color2
-    for i in range(int(num_pixels * amount)):
+    amount = clamp(amount, 0, 1)
+    pixel_amount = int(num_pixels * amount)
+    for i in range(pixel_amount):
         pixels[i] = color1
+    for i in range(pixel_amount, num_pixels):
+        pixels[i] = color2
     pixels.show()
+
 
 def rainbow(offset):
     for i in range(num_pixels):
@@ -76,10 +83,12 @@ def rainbow(offset):
         pixels[i] = wheel(rc_index & 255)
     pixels.show()
 
+
 def rainbow_cycle(wait):
     for j in range(255):
         rainbow(j)
         time.sleep(wait)
+
 
 magtag.add_text(
     text_font=terminalio.FONT,
@@ -89,42 +98,47 @@ magtag.add_text(
     text_color=0x000000,
     line_spacing=0.8
 )
-magtag.set_text(setting_modes[setting_mode])
+magtag.set_text(settings[setting])
 
 while 1:
-    rainbow(rainbow_pos)  # Increase the number to slow down the rainbow
-    rainbow_pos += 1
-    rainbow_pos %= 255
 
-    if (not button_pressed):
+    if (not button_pressed) and magtag.peripherals.any_button_pressed:
         button_pressed = True
         if magtag.peripherals.button_a_pressed:
-            setting_mode += 1
-            setting_mode %= len(setting_modes)
-            magtag.set_text(setting_modes[setting_mode])
+            setting_num += 1
+            setting_num %= len(settings)
+            magtag.set_text(settings[setting])
         elif magtag.peripherals.button_b_pressed:
-            setting_mode -= 1
-            setting_mode %= len(setting_modes)
-            magtag.set_text(setting_modes[setting_mode])
+            setting_num -= 1
+            setting_num %= len(settings)
+            magtag.set_text(settings[setting])
         elif magtag.peripherals.button_c_pressed:
-            mode = setting_modes[setting_mode]
+            mode = settings[setting]
             if mode is "brightness":
                 pixel_brightness += 0.1
-                pixel_brightness = clamp(pixel_brightness, 0, 1)
+                pixel_brightness = clamp(pixel_brightness, 0.1, 1)
                 pixels.brightness = pixel_brightness
+                scale(RED, BLUE, pixel_brightness)
             if mode is "speed":
                 wait_time -= 0.001
                 wait_time = clamp(wait_time, 0, 0.1)
+                scale(RED, BLUE, wait_time * 100)
         elif magtag.peripherals.button_d_pressed:
-            mode = setting_modes[setting_mode]
+            mode = settings[setting]
             if mode is "brightness":
                 pixel_brightness -= 0.1
-                pixel_brightness = clamp(pixel_brightness, 0, 1)
+                pixel_brightness = clamp(pixel_brightness, 0.1, 1)
                 pixels.brightness = pixel_brightness
+                scale(RED, BLUE, pixel_brightness)
             if mode is "speed":
                 wait_time += 0.001
                 wait_time = clamp(wait_time, 0, 0.1)
+                scale(RED, BLUE, wait_time * 100)
     elif (not magtag.peripherals.any_button_pressed):
         button_pressed = False
+
+        rainbow(rainbow_pos)  # Increase the number to slow down the rainbow
+        rainbow_pos += 1
+        rainbow_pos %= 255
 
     time.sleep(wait_time)
