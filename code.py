@@ -31,7 +31,7 @@ setting_num = 0
 modes = ["rainbow", "off"]
 mode_num = 0
 
-wait_time = 0
+wait_time = 0.2
 
 button_pressed = False
 
@@ -116,13 +116,13 @@ while 1:
             setting_mode = settings[setting_num]
             if setting_mode is "brightness":
                 pixel_brightness += 0.1
-                pixel_brightness = clamp(pixel_brightness, 0.1, 1)
+                pixel_brightness = clamp(pixel_brightness, 0.01, 1)
                 pixels.brightness = pixel_brightness
                 scale(RED, BLUE, pixel_brightness)
             if setting_mode is "speed":
-                wait_time -= 0.001
-                wait_time = clamp(wait_time, 0, 0.1)
-                scale(RED, BLUE, wait_time * 100)
+                wait_time -= 0.05
+                wait_time = clamp(wait_time, 0, 0.5)
+                scale(RED, BLUE, wait_time * 2)
             if setting_mode is "mode":
                 mode_num -= 1
                 mode_num %= len(modes)
@@ -130,13 +130,13 @@ while 1:
             setting_mode = settings[setting_num]
             if setting_mode is "brightness":
                 pixel_brightness -= 0.1
-                pixel_brightness = clamp(pixel_brightness, 0.1, 1)
+                pixel_brightness = clamp(pixel_brightness, 0.01, 1)
                 pixels.brightness = pixel_brightness
                 scale(RED, BLUE, pixel_brightness)
             if setting_mode is "speed":
-                wait_time += 0.001
-                wait_time = clamp(wait_time, 0, 0.1)
-                scale(RED, BLUE, wait_time * 100)
+                wait_time += 0.05
+                wait_time = clamp(wait_time, 0, 0.5)
+                scale(RED, BLUE, wait_time * 2)
             if setting_mode is "mode":
                 mode_num += 1
                 mode_num %= len(modes)
