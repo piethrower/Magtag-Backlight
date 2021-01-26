@@ -25,10 +25,10 @@ magtag.peripherals.neopixel_disable = False
 pixels = neopixel.NeoPixel(pixel_pin, num_pixels,
                            brightness=pixel_brightness, auto_write=False)
 
-settings = ["brightness", "speed", "mode"]
+settings = ["mode", "brightness", "speed"]
 setting_num = 0
 
-modes = ["rainbow", "off"]
+modes = ["off", "rainbow"]
 mode_num = 0
 
 wait_time = 0.2
