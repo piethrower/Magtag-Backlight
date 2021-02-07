@@ -5,6 +5,9 @@ import neopixel
 import board
 import terminalio
 
+# TODO:
+# more modes
+
 magtag = MagTag()
 
 pixel_pin = board.D10
@@ -28,7 +31,7 @@ pixels = neopixel.NeoPixel(pixel_pin, num_pixels,
 settings = ["mode", "brightness", "speed"]
 setting_num = 0
 
-modes = ["off", "rainbow"]
+modes = ["off", "rainbow", "color", "fill"]
 mode_num = 0
 
 wait_time = 0.2
@@ -145,9 +148,17 @@ while 1:
 
         cur_mode = modes[mode_num]
         if cur_mode is "rainbow":
-            rainbow(rainbow_pos)  # Increase the number to slow down the rainbow
+            rainbow(rainbow_pos)
             rainbow_pos += 1
             rainbow_pos %= 255
+        elif cur_mode is "color":
+            pixels.fill(wheel(rainbow_pos))
+            pixels.show()
+            rainbow_pos += 1
+            rainbow_pos %= 255
+        elif cur_mode is "fill":
+            pixels.fill(wheel(rainbow_pos))
+            pixels.show()
         elif cur_mode is "off":
             pixels.fill((0,0,0))
             pixels.show()
