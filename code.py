@@ -4,9 +4,16 @@ import time
 import neopixel
 import board
 import terminalio
+import ssl
+import adafruit_requests
+import socketpool
+import wifi
+from adafruit_io.adafruit_io import IO_HTTP
 
 # TODO:
 # more modes
+# actually use the display
+# cleanup
 
 magtag = MagTag()
 
@@ -28,11 +35,36 @@ magtag.peripherals.neopixel_disable = False
 pixels = neopixel.NeoPixel(pixel_pin, num_pixels,
                            brightness=pixel_brightness, auto_write=False)
 
+
+# Get wifi details and more from a secrets.py file
+try:
+    from secrets import secrets
+except ImportError:
+    print("WiFi secrets are kept in secrets.py, please add them there!")
+    raise
+
+# Get our username, key and desired timezone
+aio_username = secrets["aio_username"]
+aio_key = secrets["aio_key"]
+
+# try:
+#     magtag.network.connect()
+# except ConnectionError as e:
+#     print(e)
+#     print("Continuing without WiFi")
+
+wifi.radio.connect(secrets["ssid"], secrets["password"])
+
+pool = socketpool.SocketPool(wifi.radio)
+requests = adafruit_requests.Session(pool, ssl.create_default_context())
+# Initialize an Adafruit IO HTTP API object
+aio = IO_HTTP(aio_username, aio_key, requests)
+
 settings = ["mode", "brightness", "speed"]
 setting_num = 0
 
 modes = ["off", "rainbow", "color", "fill"]
-mode_num = 0
+mode_num = 3
 
 wait_time = 0.2
 
@@ -157,10 +189,16 @@ while 1:
             rainbow_pos += 1
             rainbow_pos %= 255
         elif cur_mode is "fill":
-            pixels.fill(wheel(rainbow_pos))
+            #try:
+            #color_feed = aio.get_feed("magtag-backlight.color")
+            color_data = aio.receive_data("magtag-backlight.color")
+            color = int(color_data["value"][1:], 16)
+            pixels.fill(color)
             pixels.show()
+            # except Exception as error:
+            #     print(error)
         elif cur_mode is "off":
-            pixels.fill((0,0,0))
+            pixels.fill((0, 0, 0))
             pixels.show()
 
     time.sleep(wait_time)
